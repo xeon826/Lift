@@ -1,5 +1,6 @@
 import createBackground from 'components/createBackground';
 import Player from 'components/Player';
+import Entity from 'components/Entity';
 import decomp from 'poly-decomp'
 import 'main.css';
 import {
@@ -72,9 +73,10 @@ const main = async () => {
     mousePos.x = e.clientX;
     mousePos.y = e.clientY;
     lastObjClicked = Query.point([boxB], mousePos)[0],
-    grabbed = lastObjClicked;
+      grabbed = lastObjClicked;
   }
   document.body.onmouseup = function(e) {
+    player.throw(lastObjClicked);
     lastObjClicked = null;
   }
   Events.on(engine, 'collisionStart', function(event) {
@@ -84,26 +86,10 @@ const main = async () => {
     }
   });
   Events.on(engine, "beforeUpdate", function(e) {
-    var speedCap = 10,
-      baseRunningSpeed = 0.01,
-      stopped = 0,
-      speed = {
-        x: keys['68'] || keys['65'] ? Math.abs(player.body.velocity.x) > speedCap ? stopped : baseRunningSpeed : stopped,
-        y: keys['32'] || keys['87'] ? Math.abs(player.body.velocity.y) > speedCap ? stopped : baseRunningSpeed : stopped
-      }
     if (lastObjClicked) {
       player.grab(lastObjClicked);
     }
-
-
-    Body.applyForce(player.body, {
-      x: player.body.position.x,
-      y: player.body.position.y
-    }, {
-      x: keys['65'] ? speed.x * -1 : speed.x,
-      y: -speed.y
-    });
-
+    player.move(keys);
   })
 }
 

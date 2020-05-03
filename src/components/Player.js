@@ -1,13 +1,24 @@
+import Entity from 'components/Entity';
 import {
   Body,
   Bodies,
   Vertices
 } from 'matter-js';
-class Player {
-  constructor(type = 'block') {
+class Player extends Entity {
+  constructor() {
+    super();
     this.vertices = Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40");
     this.body = Bodies.fromVertices(100, 200, this.vertices, {
+      inertia: Infinity,
+      friction: 0.1,
+      frictionStatic: 0,
+      frictionAir: 0.02
     });
+    var mouse = {};
+    window.onmousemove = function(e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    }
   }
 
   grab(obj) {
@@ -20,6 +31,33 @@ class Player {
         x: this.isBehind(obj) ? -relativeDistance : relativeDistance,
         y: this.isAbove(obj) ? -relativeDistance : relativeDistance
       });
+  }
+
+  move(keys) {
+    var speedCap = 10,
+      baseRunningSpeed = 0.03,
+      stopped = 0,
+      speed = {
+        x: keys['68'] || keys['65'] ? Math.abs(this.body.velocity.x) > speedCap ? stopped : baseRunningSpeed : stopped,
+        y: keys['32'] || keys['87'] ? Math.abs(this.body.velocity.y) > speedCap ? stopped : baseRunningSpeed : stopped
+      }
+    Body.applyForce(this.body, {
+      x: this.body.position.x,
+      y: this.body.position.y
+    }, {
+      x: keys['65'] ? speed.x * -1 : speed.x,
+      y: -speed.y
+    });
+  }
+
+  throw (obj) {
+    // Body.applyForce(obj, {
+    //   x: obj.position.x,
+    //   y: obj.position.y
+    // }, {
+    //   x: ,
+    //   y:
+    // });
   }
 
   isBehind(obj) {
