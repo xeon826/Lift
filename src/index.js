@@ -15,6 +15,7 @@ import {
   Render,
   Constraint
 } from 'matter-js';
+require ('utils/scaleBetween');
 
 const main = async () => {
   window.decomp = decomp
@@ -27,6 +28,7 @@ const main = async () => {
     element: document.body,
     engine: engine,
     options: {
+      wireframes: false,
       width: window.innerWidth,
       height: window.innerHeight
     }
@@ -37,12 +39,19 @@ const main = async () => {
       inertia: Infinity,
       friction: 0.1,
       frictionStatic: 0,
-      frictionAir: 0.02
+      frictionAir: 0.02,
+      render: {
+        sprite: {
+          texture: '/img/objectSprite.png',
+          yScale: .5,
+          xScale: .5
+        }
+      }
     })),
     // boxB = Bodies.rectangle(1350, 50, 80, 80);
-    boxB = new MovableObject(Bodies.rectangle(1350, 50, 80, 80)),
-    boxB = boxB.body;
-  var movableObjects = [];
+    movableObjects = {
+      boxB: new MovableObject(Bodies.rectangle(1350, 50, 80, 80))
+    }
   var ground = Bodies.rectangle(window.innerWidth / 2, 750, window.innerWidth, 60, {
     isStatic: true,
     isFloor: true,
@@ -58,9 +67,14 @@ const main = async () => {
   var ceiling = Bodies.rectangle(window.innerWidth / 2, 0, window.innerWidth, 60, {
     isStatic: true
   });
+  var allObjs = [];
+  allObjs.push(ground, player.body, ground, walls.right, walls.left, ceiling);
+  for (var key in movableObjects) {
+    allObjs.push(movableObjects[key].body);
+  }
 
   // add all of the bodies to the world
-  World.add(engine.world, [player.body, boxB, ground, walls.right, walls.left, ceiling]);
+  World.add(engine.world, allObjs);
 
   // run the engine
   Engine.run(engine);
@@ -76,12 +90,21 @@ const main = async () => {
   }
   var lastObjClicked = '',
     grabbed = '',
-    mousePos = {};
+    mousePos = {},
+    initialDistance = '';
   document.body.onmousedown = function(e) {
     mousePos.x = e.clientX;
     mousePos.y = e.clientY;
-    lastObjClicked = Query.point([boxB], mousePos)[0],
-      grabbed = lastObjClicked;
+    var objsToArray = [];
+    for (var key in movableObjects) {
+      objsToArray.push(movableObjects[key].body);
+    }
+    var tmp = Query.point(objsToArray, mousePos)[0];
+    for (var key in movableObjects) {
+      if (tmp == movableObjects[key].body)
+      lastObjClicked = movableObjects[key];
+      initialDistance = player.getDistanceFrom(lastObjClicked.body);
+    }
   }
   document.body.onmouseup = function(e) {
     player.throw(lastObjClicked);
@@ -89,16 +112,30 @@ const main = async () => {
   }
   Events.on(engine, 'collisionStart', function(event) {
     var pair = event.pairs[0];
-    if (pair.bodyA == player.body && pair.bodyB == grabbed) {
-      pair.isActive = false;
+    for (var key in movableObjects) {
+      if (pair.bodyA == player.body && pair.bodyB == movableObjects[key].body) {
+        // pair.bodyB.velocity.x = 1;
+        // movableObjects[key].body.velocity.x = 1;
+        pair.isActive = false;
+      }
+    }
+    if (pair.bodyA == player.body && pair.bodyB == ground) {
+      player.isOnGround = true;
+    }
+  });
+  Events.on(engine, 'collisionEnd', function(event) {
+    var pair = event.pairs[0];
+    if (pair.bodyA == player.body && pair.bodyB == ground) {
+      player.isOnGround = false;
     }
   });
   Events.on(engine, "beforeUpdate", function(e) {
     if (lastObjClicked) {
-      player.grab(lastObjClicked);
+      player.grab(lastObjClicked, initialDistance);
     }
     player.move(keys);
   })
 }
+
 
 main().then(() => console.log('Started'));
