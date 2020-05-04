@@ -18,6 +18,9 @@ class Entity {
     var c = Math.sqrt(a * a + b * b);
     return c
   }
+  get() {
+    return this;
+  }
 }
 
 export default Entity;

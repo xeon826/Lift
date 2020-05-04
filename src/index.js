@@ -1,5 +1,6 @@
 import createBackground from 'components/createBackground';
 import Player from 'components/Player';
+import MovableObject from 'components/MovableObject';
 import Entity from 'components/Entity';
 import decomp from 'poly-decomp'
 import 'main.css';
@@ -32,8 +33,15 @@ const main = async () => {
   });
 
   // create two boxes and a ground
-  var player = new Player(),
-    boxB = Bodies.rectangle(1350, 50, 80, 80);
+  var player = new Player(Bodies.fromVertices(100, 200, Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"), {
+      inertia: Infinity,
+      friction: 0.1,
+      frictionStatic: 0,
+      frictionAir: 0.02
+    })),
+    // boxB = Bodies.rectangle(1350, 50, 80, 80);
+    boxB = new MovableObject(Bodies.rectangle(1350, 50, 80, 80)),
+    boxB = boxB.body;
   var movableObjects = [];
   var ground = Bodies.rectangle(window.innerWidth / 2, 750, window.innerWidth, 60, {
     isStatic: true,

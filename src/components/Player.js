@@ -1,19 +1,12 @@
-import Entity from 'components/Entity';
 import {
   Body,
   Bodies,
   Vertices
 } from 'matter-js';
+import Entity from 'components/Entity';
 class Player extends Entity {
-  constructor() {
-    super();
-    this.vertices = Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40");
-    this.body = Bodies.fromVertices(100, 200, this.vertices, {
-      inertia: Infinity,
-      friction: 0.1,
-      frictionStatic: 0,
-      frictionAir: 0.02
-    });
+  constructor(body) {
+    super(body);
     var mouse = {};
     window.onmousemove = function(e) {
       mouse.x = e.clientX;
@@ -58,22 +51,6 @@ class Player extends Entity {
     //   x: ,
     //   y:
     // });
-  }
-
-  isBehind(obj) {
-    return this.body.position.x < obj.position.x;
-  }
-
-  isAbove(obj) {
-    return this.body.position.y < obj.position.y;
-  }
-
-  getDistanceFrom(obj) {
-    var a = this.body.position.x - obj.position.x;
-    var b = this.body.position.y - obj.position.y;
-
-    var c = Math.sqrt(a * a + b * b);
-    return c
   }
 
   getSqrtOfWindow() {
