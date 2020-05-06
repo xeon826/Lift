@@ -8,6 +8,8 @@ import {
   Engine,
   World,
   Events,
+  MouseConstraint,
+  Mouse,
   Query,
   Body,
   Bodies,
@@ -15,9 +17,11 @@ import {
   Render,
   Constraint
 } from 'matter-js';
-require ('utils/scaleBetween');
+require('utils/arrayUtils');
+const objectBluePrints = require('./objects.json');
 
 const main = async () => {
+  console.log(objectBluePrints);
   window.decomp = decomp
 
   // create an engine
@@ -34,40 +38,72 @@ const main = async () => {
     }
   });
 
+  var defaultCategory = 0x0001,
+    redCategory = 0x0002,
+    greenCategory = 0x0004,
+    blueCategory = 0x0008,
+    mouse = Mouse.create(render.canvas),
+    mouseConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      collisionFilter: {
+        mask: greenCategory
+      },
+      constraint: {
+        stiffness: 0.2,
+        render: {
+          visible: false
+        }
+      }
+    });
+  var movableObjects = {};
+  objectBluePrints.movable.forEach(function(obj) {
+    console.log(obj.options);
+    movableObjects[obj.name] = new MovableObject(Bodies.rectangle(obj.x, obj.y, obj.width, obj.height, obj.options));
+  })
+
+
   // create two boxes and a ground
-  var player = new Player(Bodies.fromVertices(100, 200, Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"), {
+  var player = new Player(Bodies.fromVertices(100, 500, Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"), {
       inertia: Infinity,
       friction: 0.1,
       frictionStatic: 0,
       frictionAir: 0.02,
       render: {
         sprite: {
-          texture: '/img/objectSprite.png',
-          yScale: .5,
-          xScale: .5
+          texture: '/img/player/standing.right.png',
+          yScale: 1,
+          xScale: 1
         }
+      },
+      collisionFilter: {
+        mask: defaultCategory
       }
     })),
-    // boxB = Bodies.rectangle(1350, 50, 80, 80);
-    movableObjects = {
-      boxB: new MovableObject(Bodies.rectangle(1350, 50, 80, 80))
-    }
-  var ground = Bodies.rectangle(window.innerWidth / 2, 750, window.innerWidth, 60, {
-    isStatic: true,
-    isFloor: true,
-  });
-  var walls = {
-    right: Bodies.rectangle(window.innerWidth, 300, 60, window.innerHeight, {
+    ground = Bodies.rectangle(window.innerWidth / 2, 750, window.innerWidth, 60, {
+      isStatic: true,
+      isFloor: true,
+      collisionFilter: {
+        mask: redCategory | defaultCategory
+      }
+    }),
+    walls = {
+      right: Bodies.rectangle(window.innerWidth, 300, 120, window.innerHeight, {
+        isStatic: true,
+        collisionFilter: {
+          mask: redCategory | defaultCategory
+        }
+      }),
+      left: Bodies.rectangle(0, 300, 120, window.innerHeight, {
+        isStatic: true,
+        collisionFilter: {
+          mask: redCategory | defaultCategory
+        }
+      })
+    },
+    ceiling = Bodies.rectangle(window.innerWidth / 2, 0, window.innerWidth, 60, {
       isStatic: true
     }),
-    left: Bodies.rectangle(0, 300, 60, window.innerHeight, {
-      isStatic: true
-    })
-  };
-  var ceiling = Bodies.rectangle(window.innerWidth / 2, 0, window.innerWidth, 60, {
-    isStatic: true
-  });
-  var allObjs = [];
+    allObjs = [];
   allObjs.push(ground, player.body, ground, walls.right, walls.left, ceiling);
   for (var key in movableObjects) {
     allObjs.push(movableObjects[key].body);
@@ -75,6 +111,8 @@ const main = async () => {
 
   // add all of the bodies to the world
   World.add(engine.world, allObjs);
+  World.add(engine.world, mouseConstraint);
+  render.mouse = mouse;
 
   // run the engine
   Engine.run(engine);
@@ -92,36 +130,37 @@ const main = async () => {
     grabbed = '',
     mousePos = {},
     initialDistance = '';
-  document.body.onmousedown = function(e) {
-    mousePos.x = e.clientX;
-    mousePos.y = e.clientY;
+  Events.on(mouseConstraint, 'mousedown', function(e) {
+    mousePos.x = e.mouse.position.x;
+    mousePos.y = e.mouse.position.y;
     var objsToArray = [];
     for (var key in movableObjects) {
       objsToArray.push(movableObjects[key].body);
     }
     var tmp = Query.point(objsToArray, mousePos)[0];
+    console.log(Query.point(objsToArray, mousePos))
+    if (!tmp)
+      return
     for (var key in movableObjects) {
-      if (tmp == movableObjects[key].body)
-      lastObjClicked = movableObjects[key];
-      initialDistance = player.getDistanceFrom(lastObjClicked.body);
-    }
-  }
-  document.body.onmouseup = function(e) {
-    player.throw(lastObjClicked);
-    lastObjClicked = null;
-  }
-  Events.on(engine, 'collisionStart', function(event) {
-    var pair = event.pairs[0];
-    for (var key in movableObjects) {
-      if (pair.bodyA == player.body && pair.bodyB == movableObjects[key].body) {
-        // pair.bodyB.velocity.x = 1;
-        // movableObjects[key].body.velocity.x = 1;
-        pair.isActive = false;
+      if (tmp == movableObjects[key].body) {
+        lastObjClicked = movableObjects[key];
+        initialDistance = player.getDistanceFrom(lastObjClicked.body);
       }
     }
-    if (pair.bodyA == player.body && pair.bodyB == ground) {
-      player.isOnGround = true;
-    }
+  })
+
+  Events.on(mouseConstraint, 'mouseup', function(e) {
+    if (lastObjClicked)
+      player.throw(lastObjClicked, e.mouse);
+    lastObjClicked = null;
+
+  })
+  Events.on(engine, 'collisionStart', function(event) {
+    event.pairs.forEach(function(pair) {
+      if (pair.bodyA == player.body && pair.bodyB == ground || pair.bodyB == player.body && pair.bodyA == ground) {
+        player.isOnGround = true;
+      }
+    })
   });
   Events.on(engine, 'collisionEnd', function(event) {
     var pair = event.pairs[0];
@@ -129,7 +168,13 @@ const main = async () => {
       player.isOnGround = false;
     }
   });
+  // player.stress = 0;
   Events.on(engine, "beforeUpdate", function(e) {
+
+    Render.lookAt(render, [player.body.position], {
+      x: 500,
+      y: 500
+    }, true);
     if (lastObjClicked) {
       player.grab(lastObjClicked, initialDistance);
     }

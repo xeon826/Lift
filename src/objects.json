@@ -1,0 +1,42 @@
+{
+  "movable": [{
+      "name": "boxA",
+      "type": "rectangle",
+      "x": 550,
+      "y": 50,
+      "width": 80,
+      "height": 80,
+      "options": {
+        "collisionFilter": {
+          "category": "0x0002"
+        }
+      }
+    },
+    {
+      "name": "boxB",
+      "type": "rectangle",
+      "x": 650,
+      "y": 50,
+      "width": 80,
+      "height": 80,
+      "options": {
+        "collisionFilter": {
+          "category": "0x0002"
+        }
+      }
+    },
+    {
+      "name": "boxC",
+      "type": "rectangle",
+      "x": 750,
+      "y": 50,
+      "width": 80,
+      "height": 80,
+      "options": {
+        "collisionFilter": {
+          "category": "0x0002"
+        }
+      }
+    }
+  ]
+}
