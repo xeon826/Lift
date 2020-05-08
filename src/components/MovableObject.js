@@ -6,48 +6,47 @@ import {
 class MovableObject extends Entity {
   constructor(body) {
     super(body);
-    // this.body = Bodies.rectangle(950, 50, 80, 80);
     this.body = body;
     this.grabSound = new Howl({
       src: ['/sound/grab.mp3']
     });
+    this.grabSound.on('fade', () => {
+      this.grabSound.stop();
+    })
     this.idHowl = '';
-    this.isGrabbed = false;
-    this._isWhispingThroughTheAirAtARateOf = 0.0;
-    // this.body.addEventListener('grabbed', () => {
-    //     if (!this.grabSound.playing())
-    //       this.id1 = this.grabSound.play();
-    // })
+    this._isGrabbed = [false, ''];
+    this._grabSoundIsFading = false;
+    // this._isGrabbedBy = false;
   }
 
-  get isWhispingThroughTheAirAtARateOf() {
-    return this._isWhispingThroughTheAirAtARateOf;
+  get grabSoundIsFading() {
+    return this._grabSoundIsFading;
   }
 
-  set isWhispingThroughTheAirAtARateOf(rate = 0) {
-    // console.log('idHowl: ', this.idHowl);
-    // if (rate = 0 && this.isHowl) {
-    //   this.grab
-    // }
-    // if (rate > 0) {
-      // this.grabSound.volume(parseFloat(rate));
-    // } else {
-      // this.grabSound.stop();
-    // }
-    // this
-    this.grabSound.rate(rate, this.idHowl)
-    if (!this.grabSound.playing()) {
-      this.idHowl = this.grabSound.play()
-      this.isGrabbed = true;
+  set grabSoundIsFading(val) {
+    this._grabSoundIsFading = val;
+  }
+
+  get isGrabbed() {
+    return this._isGrabbed;
+  }
+
+  set isGrabbed(val) {
+    if (!val) {
+      this.grabSound.stop();
+      console.log('stop');
     }
-    // if (newValue && !this.grabSound.playing()) {
-    //   this.idHowl = this.grabSound.play()
-    // } else {
-    //   this.grabSound.fade(1, 0, 1000, this.idHowl);
-    //   // this.grabSound.stop(this.idHowl);
-    // }
+    if (val && !this._isGrabbed[0]) {
+      this.grabSoundIsFading = false;
+      this.idHowl = this.grabSound.play();
+    }
+    this._isGrabbed = val;
+    if (this.grabSound.playing() && this._isGrabbed[1] && this._isGrabbed[1].getDistanceFrom(this.body) < 200 && !this._grabSoundIsFading) {
+      this.grabSoundIsFading = true;
+      console.log('close');
+      this.grabSound.fade(1, 0, 1000, this.idHowl);
+    }
   }
-
 }
 
 export default MovableObject;

@@ -130,6 +130,8 @@ const main = async () => {
     grabbed = '',
     mousePos = {},
     initialDistance = '';
+  // Events.on(mouseConstraint, 'mousemove', function(e) {
+  //     })
   Events.on(mouseConstraint, 'mousedown', function(e) {
     mousePos.x = e.mouse.position.x;
     mousePos.y = e.mouse.position.y;
@@ -138,7 +140,6 @@ const main = async () => {
       objsToArray.push(movableObjects[key].body);
     }
     var tmp = Query.point(objsToArray, mousePos)[0];
-    console.log(Query.point(objsToArray, mousePos))
     if (!tmp)
       return
     for (var key in movableObjects) {
@@ -178,7 +179,7 @@ const main = async () => {
     if (lastObjClicked) {
       player.grab(lastObjClicked, initialDistance);
     }
-    player.move(keys);
+    player.move(keys, mouseConstraint);
   })
 }
 
