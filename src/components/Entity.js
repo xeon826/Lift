@@ -1,3 +1,7 @@
+import {
+  Bodies,
+  Vertices
+} from 'matter-js';
 class Entity {
   constructor(body) {
     this.body = body;

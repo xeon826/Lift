@@ -16,6 +16,9 @@ class MovableObject extends Entity {
     this.idHowl = '';
     this._isGrabbed = [false, ''];
     this._grabSoundIsFading = false;
+    this.throwSound = new Howl({
+      src: ['/sound/throw.mp3']
+    })
     // this._isGrabbedBy = false;
   }
 
@@ -33,6 +36,7 @@ class MovableObject extends Entity {
 
   set isGrabbed(val) {
     if (!val) {
+      this.throwSound.play();
       this.grabSound.stop();
       console.log('stop');
     }
@@ -44,7 +48,7 @@ class MovableObject extends Entity {
     if (this.grabSound.playing() && this._isGrabbed[1] && this._isGrabbed[1].getDistanceFrom(this.body) < 200 && !this._grabSoundIsFading) {
       this.grabSoundIsFading = true;
       console.log('close');
-      this.grabSound.fade(1, 0, 1000, this.idHowl);
+      this.grabSound.fade(1, 0.5, 1000, this.idHowl);
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "movable": [{
+  "movables": [{
       "name": "boxA",
       "type": "rectangle",
       "x": 550,
@@ -36,6 +36,75 @@
         "collisionFilter": {
           "category": "0x0002"
         }
+      }
+    }
+  ],
+  "enemies": [{
+    "name": "cryBabyA",
+    "type": "vertice",
+    "x": 250,
+    "y": 50,
+    "path": "0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40",
+    "options": {
+      "friction": 0.1,
+      "frictionStatic": 0,
+      "frictionAir": 0.02,
+      "mass": 1200,
+      "render": {
+        "sprite": {
+          "texture": "/img/enemy/cry_baby/cry_baby.png",
+          "yScale": 1,
+          "xScale": 1
+        }
+      },
+      "collisionFilter": {
+        "mask": "0x0001"
+      }
+    }
+  }],
+  "architectures": [{
+      "name": "groundA",
+      "type": "rectangle",
+      "x": 960,
+      "y": 750,
+      "width": 1920,
+      "height": 120,
+      "options": {
+        "isStatic": true,
+        "isFloor": true
+      }
+    },
+    {
+      "name": "wallA",
+      "type": "rectangle",
+      "x": 1920,
+      "y": 300,
+      "width": 120,
+      "height": 1080,
+      "options": {
+        "isStatic": true
+      }
+    },
+    {
+      "name": "wallB",
+      "type": "rectangle",
+      "x": 0,
+      "y": 300,
+      "width": 120,
+      "height": 1080,
+      "options": {
+        "isStatic": true
+      }
+    },
+    {
+      "name": "ceilingA",
+      "type": "rectangle",
+      "x": 960,
+      "y": 0,
+      "width": 1920,
+      "height": 60,
+      "options": {
+        "isStatic": true
       }
     }
   ]
