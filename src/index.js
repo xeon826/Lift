@@ -15,6 +15,7 @@ import {
   World,
   Events,
   MouseConstraint,
+  Common,
   Mouse,
   Query,
   Body,
@@ -30,11 +31,11 @@ const main = async () => {
   window.decomp = decomp
 
   // var ambience = new Howl({
-  //     src: ['/sound/ambience.mp3'],
-  //     autoplay: true,
-  //     loop: true,
-  //     volume: 0.2,
-  //   });
+  //   src: ['/sound/ambience.mp3'],
+  //   autoplay: true,
+  //   loop: true,
+  //   volume: 0.2,
+  // });
   var contact = new Howl({
     src: ['/sound/contact.mp3'],
   });
@@ -90,16 +91,15 @@ const main = async () => {
       }
       switch (category) {
         case 'movables':
-          object = new MovableObject(body);
+          object = Common.extend(body, new MovableObject);
           break;
         case 'enemies':
-          object = new Enemy(body);
-          object.body.inertia = Infinity;
-          object.body.collisionFilter.mask = 0x0001 | 0x0002;
+          object = Common.extend(body, new Enemy);
+          object.inertia = Infinity;
+          object.collisionFilter.mask = 0x0001 | 0x0002;
           break;
         case 'architectures':
-          object = new Architecture(body);
-          object.body.collisionFilter.mask = redCategory | defaultCategory;
+          object = Common.extend(body, new Architecture);
           break;
       }
       objects[key] = objects[key] ? objects[key] : [];
@@ -109,12 +109,11 @@ const main = async () => {
   objects.getBodiesAsArray = function(key) {
     var bodies = [];
     this[key].forEach((item, i) => {
-      bodies.push(item.body);
+      bodies.push(item);
     });
     return bodies;
   }
-  // create two boxes and a ground
-  var player = new Player(Bodies.fromVertices(100, 500, Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"), {
+  var player = Common.extend(Bodies.fromVertices(100, 500, Vertices.fromPath("0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40"), {
     inertia: Infinity,
     friction: 0.1,
     frictionStatic: 0,
@@ -129,13 +128,13 @@ const main = async () => {
     collisionFilter: {
       mask: defaultCategory
     }
-  }));
+  }), new Player)
   // add all of the bodies to the world
   objects.player = [player];
   for (var key in objects) {
     if (typeof objects[key] != 'function')
       objects[key].forEach(function(obj) {
-        World.add(engine.world, obj.body);
+        World.add(engine.world, obj);
       })
   }
   World.add(engine.world, mouseConstraint);
@@ -162,27 +161,27 @@ const main = async () => {
     mousePos.y = e.mouse.position.y;
     var objsToArray = [];
     for (var key in movableObjects) {
-      objsToArray.push(movableObjects[key].body);
+      objsToArray.push(movableObjects[key]);
     }
     var tmp = Query.point(objects.getBodiesAsArray('movables'), mousePos)[0];
     if (!tmp)
       return
-    objects.movables.some((obj) => {
-      lastObjClicked = obj;
-      return tmp == obj.body;
-    })
-    initialDistance = objects.player[0].getDistanceFrom(lastObjClicked.body);
+    lastObjClicked = tmp;
+    lastObjClicked.playGrabSound();
+    initialDistance = objects.player[0].getDistanceFrom(lastObjClicked);
   })
 
   Events.on(mouseConstraint, 'mouseup', function(e) {
-    if (lastObjClicked)
+    if (lastObjClicked) {
       player.throw(lastObjClicked, e.mouse);
+      lastObjClicked.playThrowSound();
+    }
     lastObjClicked = null;
 
   })
   Events.on(engine, 'collisionStart', function(event) {
     event.pairs.forEach(function(pair) {
-      if (pair.bodyA.isGround || pair.bodyB.isGround && pair.bodyA == objects.player[0].body || pair.bodyB == objects.player[0].body) {
+      if (pair.bodyA.isGround || pair.bodyB.isGround && pair.bodyA == objects.player[0] || pair.bodyB == objects.player[0]) {
         player.isOnGround = true;
       } else if (objects.architectures.includes(pair.bodyA) && objects.movables.includes(pair.bodyB) || objects.architectures.includes(pair.bodyB) && objects.movables.includes(pair.bodyA)) {
         var idHowl = contact.play();
@@ -192,13 +191,13 @@ const main = async () => {
   });
   Events.on(engine, 'collisionEnd', function(event) {
     event.pairs.forEach(function(pair) {
-      if (pair.bodyA.isGround || pair.bodyB.isGround && pair.bodyA == objects.player[0].body || pair.bodyB == objects.player[0].body) {
+      if (pair.bodyA.isGround || pair.bodyB.isGround && pair.bodyA == objects.player[0] || pair.bodyB == objects.player[0]) {
         objects.player[0].isOnGround = false;
       }
     })
   });
   Events.on(engine, "beforeUpdate", function(e) {
-    Render.lookAt(render, [player.body.position], {
+    Render.lookAt(render, [player.position], {
       x: 500,
       y: 500
     }, true);
@@ -206,12 +205,37 @@ const main = async () => {
       player.grab(lastObjClicked, initialDistance);
     }
     player.move(keys, mouseConstraint);
-    // objects.enemies.forEach((enemy) => {
-    //   if (player.getDistanceFrom(enemy.body) < 600)
-    //     enemy.runToward(player);
-    // })
+    objects.enemies.forEach((enemy) => {
+      if (player.getDistanceFrom(enemy) < 600)
+        enemy.runToward(player);
+    })
   })
 }
+    let canvas;
+    let context;
+
+    window.onload = init;
+
+    function init(){
+        canvas = document.querySelector('canvas');
+        context = canvas.getContext('2d');
+
+        // Start the first frame request
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    function gameLoop(timeStamp){
+        draw();
+
+        // Keep requesting new frames
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    function draw(){
+        // let randomColor = Math.random() > 0.5? '#ff8080' : '#0099b0';
+        // context.fillStyle = randomColor;
+        // context.fillRect(100, 50, 200, 175);
+    }
 
 
 main().then(() => console.log('Started'));
