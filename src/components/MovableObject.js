@@ -9,12 +9,6 @@ class MovableObject extends Entity {
     super();
     this.grabSound = new Sound('/sound/grab.mp3');
     this.throwSound = new Sound('/sound/throw.mp3');
-    this.playGrabSound = function() {
-      this.grabSound.play();
-    }
-    this.playThrowSound = function() {
-      this.throwSound.play();
-    }
   }
 }
 

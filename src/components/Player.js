@@ -17,7 +17,7 @@ class Player extends Entity {
     this.grab = function(obj, initialDistance) {
       var divider = 2,
         multiplier = Math.sin([0.00, this.getDistanceFrom(obj), initialDistance].scaleBetween(0, Math.PI / divider)[1]) * 0.1,
-        polarDirection = Math.atan2(this.position.y - 75 - obj.position.y, this.position.x - 75 - obj.position.x),
+        polarDirection = Math.atan2(this.position.y - 75 - obj.position.y, this.position.x - obj.position.x),
         objX = Math.cos(polarDirection) * multiplier,
         objY = Math.sin(polarDirection) * multiplier;
       if (this.getDistanceFrom(obj) < 300) {

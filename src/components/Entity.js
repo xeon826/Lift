@@ -1,5 +1,6 @@
 import {
   Bodies,
+  Body,
   Vertices
 } from 'matter-js';
 class Entity {

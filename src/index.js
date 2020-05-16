@@ -15,6 +15,7 @@ import {
   World,
   Events,
   MouseConstraint,
+  Runner,
   Common,
   Mouse,
   Query,
@@ -30,12 +31,12 @@ const objectBluePrints = require('./objects.json');
 const main = async () => {
   window.decomp = decomp
 
-  // var ambience = new Howl({
-  //   src: ['/sound/ambience.mp3'],
-  //   autoplay: true,
-  //   loop: true,
-  //   volume: 0.2,
-  // });
+  var ambience = new Howl({
+    src: ['/sound/ambience.mp3'],
+    autoplay: true,
+    loop: true,
+    volume: 0.2,
+  });
   var contact = new Howl({
     src: ['/sound/contact.mp3'],
   });
@@ -167,14 +168,15 @@ const main = async () => {
     if (!tmp)
       return
     lastObjClicked = tmp;
-    lastObjClicked.playGrabSound();
+    lastObjClicked.grabSound.play();
     initialDistance = objects.player[0].getDistanceFrom(lastObjClicked);
   })
 
   Events.on(mouseConstraint, 'mouseup', function(e) {
     if (lastObjClicked) {
       player.throw(lastObjClicked, e.mouse);
-      lastObjClicked.playThrowSound();
+      lastObjClicked.grabSound.stop();
+      lastObjClicked.throwSound.play();
     }
     lastObjClicked = null;
 
@@ -211,31 +213,6 @@ const main = async () => {
     })
   })
 }
-    let canvas;
-    let context;
-
-    window.onload = init;
-
-    function init(){
-        canvas = document.querySelector('canvas');
-        context = canvas.getContext('2d');
-
-        // Start the first frame request
-        window.requestAnimationFrame(gameLoop);
-    }
-
-    function gameLoop(timeStamp){
-        draw();
-
-        // Keep requesting new frames
-        window.requestAnimationFrame(gameLoop);
-    }
-
-    function draw(){
-        // let randomColor = Math.random() > 0.5? '#ff8080' : '#0099b0';
-        // context.fillStyle = randomColor;
-        // context.fillRect(100, 50, 200, 175);
-    }
 
 
 main().then(() => console.log('Started'));
