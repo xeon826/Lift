@@ -31,12 +31,12 @@ const objectBluePrints = require('./objects.json');
 const main = async () => {
   window.decomp = decomp
 
-  var ambience = new Howl({
-    src: ['/sound/ambience.mp3'],
-    autoplay: true,
-    loop: true,
-    volume: 0.2,
-  });
+  // var ambience = new Howl({
+  //   src: ['/sound/ambience.mp3'],
+  //   autoplay: true,
+  //   loop: true,
+  //   volume: 0.2,
+  // });
   var contact = new Howl({
     src: ['/sound/contact.mp3'],
   });
