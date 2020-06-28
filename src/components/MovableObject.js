@@ -7,6 +7,7 @@ import {
 class MovableObject extends Entity {
   constructor() {
     super();
+    this.category = 'movable';
     this.grabSound = new Sound('/sound/grab.mp3');
     this.throwSound = new Sound('/sound/throw.mp3');
   }

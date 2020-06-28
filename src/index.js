@@ -15,6 +15,7 @@ import {
   World,
   Events,
   MouseConstraint,
+  Composite,
   Runner,
   Common,
   Mouse,
@@ -31,12 +32,12 @@ const objectBluePrints = require('./objects.json');
 const main = async () => {
   window.decomp = decomp
 
-  // var ambience = new Howl({
-  //   src: ['/sound/ambience.mp3'],
-  //   autoplay: true,
-  //   loop: true,
-  //   volume: 0.2,
-  // });
+  var ambience = new Howl({
+    src: ['/sound/ambience.mp3'],
+    autoplay: true,
+    loop: true,
+    volume: 0.2,
+  });
   var contact = new Howl({
     src: ['/sound/contact.mp3'],
   });
@@ -97,7 +98,10 @@ const main = async () => {
         case 'enemies':
           object = Common.extend(body, new Enemy);
           object.inertia = Infinity;
+          object.restitution = .6;
+          object.hp = obj.hp;
           object.collisionFilter.mask = 0x0001 | 0x0002;
+          console.log(object);
           break;
         case 'architectures':
           object = Common.extend(body, new Architecture);
@@ -182,12 +186,21 @@ const main = async () => {
 
   })
   Events.on(engine, 'collisionStart', function(event) {
+    console.log('collision');
     event.pairs.forEach(function(pair) {
+      var categories = [];
+      [pair.bodyA, pair.bodyB].forEach((body) => {
+        categories.push(body.category);
+      })
+      console.log(categories);
       if (pair.bodyA.isGround || pair.bodyB.isGround && pair.bodyA == objects.player[0] || pair.bodyB == objects.player[0]) {
         player.isOnGround = true;
-      } else if (objects.architectures.includes(pair.bodyA) && objects.movables.includes(pair.bodyB) || objects.architectures.includes(pair.bodyB) && objects.movables.includes(pair.bodyA)) {
+      } else if (categories.includes('movable') && categories.includes('architecture')) {
         var idHowl = contact.play();
         contact.volume([0, pair.separation, 100].scaleBetween(0, 1)[1], idHowl)
+      } else if (categories.includes('enemy') && categories.includes('movable') && pair.separation > 10) {
+        var enemy = pair.bodyA.category == 'enemy' ? pair.bodyA : pair.bodyB;
+        enemy.hp -= pair.separation;
       }
     })
   });
@@ -210,6 +223,10 @@ const main = async () => {
     objects.enemies.forEach((enemy) => {
       if (player.getDistanceFrom(enemy) < 600)
         enemy.runToward(player);
+      if (enemy.hp <= 0) {
+      // if (1) {
+        enemy.die(engine.world);
+      }
     })
   })
 }

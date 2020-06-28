@@ -1,5 +1,6 @@
 import {
   Bodies,
+  World,
   Body,
   Vertices
 } from 'matter-js';
@@ -7,6 +8,7 @@ class Entity {
   constructor(body) {
     this.body = body;
     this.isOnGround = false;
+    this.category = '';
     this.getDistanceFrom = function(obj) {
       var a = this.position.x - obj.position.x,
         b = this.position.y - obj.position.y,

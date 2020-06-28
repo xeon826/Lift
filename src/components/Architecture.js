@@ -13,6 +13,7 @@ require('utils/arrayUtils');
 class Architecture extends Entity {
   constructor(body) {
     super(body);
+    this.category = 'architecture';
   }
 }
 

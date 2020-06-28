@@ -1,5 +1,6 @@
 import {
   Body,
+  Composite,
   Bodies,
   Vertices
 } from 'matter-js';
@@ -14,12 +15,27 @@ require('utils/arrayUtils');
 class Enemy extends Entity {
   constructor(body) {
     super(body);
-    this.helloSound = new Sound('/sound/grab.mp3');
+    this.sounds = {};
+    this.sounds = {
+      hello: new Sound('/sound/hello_edit.mp3')
+    }
+    this.category = 'enemy';
+    this.hp = '';
+    this.die = function(world) {
+      Composite.remove(world, this);
+    }
+    this.setHp = function() {
+      
+    }
     this.runToward = function(player) {
+      if (this.getDistanceFrom(player) < 500 && !this.sounds.hello.isPlaying()) {
+        this.sounds.hello.play();
+        this.sounds.hello.setRate(Math.random());
+      }
       var polarDirection = getPolarDirection(this, player);
       Body.setVelocity(this, {
-        x: polarDirection.x * 3,
-        y: polarDirection.y * 3
+        x: polarDirection.x * 4,
+        y: polarDirection.y * 4
       });
     }
   }
