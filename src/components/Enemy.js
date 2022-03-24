@@ -23,14 +23,15 @@ class Enemy extends Entity {
     this.hp = '';
     this.die = function(world) {
       Composite.remove(world, this);
+      this.sounds.hello.stop();
     }
     this.setHp = function() {
-      
+
     }
     this.runToward = function(player) {
       if (this.getDistanceFrom(player) < 500 && !this.sounds.hello.isPlaying()) {
         this.sounds.hello.play();
-        this.sounds.hello.setRate(Math.random());
+        // this.sounds.hello.setRate(Math.random());
       }
       var polarDirection = getPolarDirection(this, player);
       Body.setVelocity(this, {
