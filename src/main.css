@@ -1,7 +1,9 @@
 body {
     min-height: 100vh;
-    background-color: transparent;
+    background-color: blue;
     overflow: hidden;
+    background-image: url('/img/background.png');
+    background-position: center center;
 }
 
 /* .main {

@@ -1,12 +1,22 @@
 {
-  "movables": [{
+  "movables": [
+    {
       "name": "boxA",
-      "type": "rectangle",
-      "x": 550,
-      "y": 50,
+      "type": "circle",
+      "x": 30,
+      "y": 30,
+      "radius": 80,
       "width": 80,
       "height": 80,
       "options": {
+        "wireframes": true,
+        "render": {
+          "sprite": {
+            "texture": "/img/movable/rock_round.png",
+            "yScale": 1.7,
+            "xScale": 1.7
+          }
+        },
         "collisionFilter": {
           "category": "0x0002"
         }
@@ -14,12 +24,20 @@
     },
     {
       "name": "boxB",
-      "type": "rectangle",
-      "x": 650,
-      "y": 50,
+      "type": "circle",
+      "x": 30,
+      "y": 30,
+      "radius": 45,
       "width": 80,
       "height": 80,
       "options": {
+        "render": {
+          "sprite": {
+            "texture": "/img/movable/rock_round.png",
+            "yScale": 1,
+            "xScale": 1
+          }
+        },
         "collisionFilter": {
           "category": "0x0002"
         }
@@ -39,30 +57,33 @@
       }
     }
   ],
-  "enemies": [{
-    "name": "cryBabyA",
-    "type": "vertice",
-    "hp": 200,
-    "x": 250,
-    "y": 50,
-    "path": "0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40",
-    "options": {
-      "friction": 0.1,
-      "frictionStatic": 0,
-      "frictionAir": 0.02,
-      "render": {
-        "sprite": {
-          "texture": "/img/enemy/cry_baby/cry_baby.png",
-          "yScale": 1,
-          "xScale": 1
+  "enemies": [
+    {
+      "name": "cryBabyA",
+      "type": "vertice",
+      "hp": 200,
+      "x": 250,
+      "y": 50,
+      "path": "0,40, 50,40, 50,115, 30,130, 20,130, 0,115, 0,40",
+      "options": {
+        "friction": 0.1,
+        "frictionStatic": 0,
+        "frictionAir": 0.02,
+        "render": {
+          "sprite": {
+            "texture": "/img/enemy/cry_baby/cry_baby.png",
+            "yScale": 1,
+            "xScale": 1
+          }
+        },
+        "collisionFilter": {
+          "mask": "0x0001"
         }
-      },
-      "collisionFilter": {
-        "mask": "0x0001"
       }
     }
-  }],
-  "architectures": [{
+  ],
+  "architectures": [
+    {
       "name": "groundA",
       "type": "rectangle",
       "x": 960,

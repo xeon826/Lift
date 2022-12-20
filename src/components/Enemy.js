@@ -29,7 +29,8 @@ class Enemy extends Entity {
 
     }
     this.runToward = function(player) {
-      if (this.getDistanceFrom(player) < 500 && !this.sounds.hello.isPlaying()) {
+      console.log(this.sounds.hello.is_playing);
+      if (this.getDistanceFrom(player) < 500 && !this.sounds.hello.is_playing) {
         this.sounds.hello.play();
         // this.sounds.hello.setRate(Math.random());
       }
